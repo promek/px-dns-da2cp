@@ -2,7 +2,7 @@
 
 * Requirements for Centos7
 ```
-$ yum install rsync at
+$ yum install rsync at sshpass
 $ service atd start
 ```
 
