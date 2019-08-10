@@ -46,7 +46,7 @@ sync_dns() {
         $DEBUG && echo "$(now) Add dns zone ${domain} to ${host}" >> $LOGFILE
         $DEBUG && echo "${result}" >> $LOGFILE
     else 
-        $DEBUG && echo "$(now) Zone already exist ${domain} on ${host}" >> /var/log/px-dns-sync.log
+        $DEBUG && echo "$(now) Zone already exist ${domain} on ${host}" >> $LOGFILE
         $DEBUG && echo "${exist}" >> $LOGFILE
     fi
 
