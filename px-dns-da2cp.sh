@@ -20,11 +20,11 @@
 
 usage() {
     echo "Usage   : px-dns-da2cp.sh COMMAND DOMAIN [--nshost] [--ipaddr]"
-	echo "Example : "
-	echo "   px-dns-da2cp.sh sync example.com --nshost ns1 --ipaddr 192.168.1.1"
+    echo "Example : "
+    echo "   px-dns-da2cp.sh sync example.com --nshost ns1 --ipaddr 192.168.1.1"
     echo "   px-dns-da2cp.sh delete example.com"
     echo
-	exit 0
+    exit 0
 }
 
 source /opt/px-dns-da2cp/config.sh
@@ -33,31 +33,38 @@ now() {
     echo $(date +"%b %e %T")
 }
 
+bash_run() {
+local output=$( bash <<EOF
+$1
+EOF
+)
+echo "$output"
+}
+
 sync_dns() {
     host=$1
     pass=$2
     domain=$3
     ip=$4
 
-    exist=$( sshpass -p "${pass}" ssh -oStrictHostKeyChecking=no -p ${port} root@${host} "whmapi1 dumpzone domain=${domain} | grep 'result: 1' " )
+    exist=$( bash_run "sshpass -p \"${pass}\" ssh -oStrictHostKeyChecking=no -p ${port} root@${host} \"whmapi1 dumpzone domain=${domain} | grep 'result: 1' \"" )
 
     if [ -z $exist ]; then
-        result=$( sshpass -p "${pass}" ssh -oStrictHostKeyChecking=no -p ${port} root@${host} "whmapi1 adddns domain=${domain} ip=${ip}" )
+        result=$( bash_run "sshpass -p \"${pass}\" ssh -oStrictHostKeyChecking=no -p ${port} root@${host} \"whmapi1 adddns domain=${domain} ip=${ip}\"" )
         $DEBUG && echo "$(now) Add dns zone ${domain} to ${host}" >> $LOGFILE
-        $DEBUG && echo "${result}" >> $LOGFILE
+        $DEBUG && echo "$result" >> $LOGFILE
     else 
         $DEBUG && echo "$(now) Zone already exist ${domain} on ${host}" >> $LOGFILE
         $DEBUG && echo "${exist}" >> $LOGFILE
     fi
 
-    result=$( rsync -avz --chown=named:named --chmod=600 -e "sshpass -p '${pass}' ssh -oStrictHostKeyChecking=no -p ${port}" /var/named/${domain}.db root@${host}:/var/named )
+    result=$( bash_run "rsync -avz --chown=named:named --chmod=600 -e \"sshpass -p '${pass}' ssh -oStrictHostKeyChecking=no -p ${port}\" /var/named/${domain}.db root@${host}:/var/named" )
     $DEBUG && echo "$(now) Sync dns zone ${domain}.db to ${host}" >> $LOGFILE
-    $DEBUG && echo "${result}" >> $LOGFILE
+    $DEBUG && echo "$result" >> $LOGFILE
 
-    result=$( sshpass -p "${pass}" ssh -oStrictHostKeyChecking=no -p ${port} root@${host} "rndc reload ${domain} IN internal;rndc reload ${domain} IN external;rndc flushname ${domain}" )
+    result=$( bash_run "sshpass -p \"${pass}\" ssh -oStrictHostKeyChecking=no -p ${port} root@${host} \"rndc reload ${domain} IN internal;rndc reload ${domain} IN external;rndc flushname ${domain}\"" )
     $DEBUG && echo "$(now) Reload dns zone ${domain} on ${host}" >> $LOGFILE
-    $DEBUG && echo "${result}" >> $LOGFILE
-
+    $DEBUG && echo "$result" >> $LOGFILE
 }
 
 delete_dns() {
@@ -65,9 +72,9 @@ delete_dns() {
     pass=$2
     domain=$3
 
-    result=$( sshpass -p "${pass}" ssh -oStrictHostKeyChecking=no -p ${port} root@${host} "whmapi1 killdns domain=${domain} " )
+    result=$( bash_run "sshpass -p \"${pass}\" ssh -oStrictHostKeyChecking=no -p ${port} root@${host} \"whmapi1 killdns domain=${domain}\"" )
     $DEBUG && echo "$(now) Delete dns zone ${domain} on ${host}" >> $LOGFILE
-    $DEBUG && echo "${result}" >> $LOGFILE
+    $DEBUG && echo "$result" >> $LOGFILE
 }
 
 ipaddr=$( head -1 /usr/local/directadmin/data/admin/ip.list ) #server ip address

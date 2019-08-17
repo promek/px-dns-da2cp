@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /opt/px-dns-da2cp/config.sh
+
 da_domain=$( env | grep domain= | cut -d= -f2)
 
 queue="/opt/px-dns-da2cp/custom/queue.atf"
@@ -18,8 +20,8 @@ fi
 jobid=$( /usr/bin/atq | awk '{print $1}' )
 
 if [ -z $jobid ]; then
-    /usr/bin/at now + 5 minutes < $queue
+    /usr/bin/at now + $time minutes < $queue
 else
     /usr/bin/atrm $jobid
-    /usr/bin/at now + 5 minutes < $queue
+    /usr/bin/at now + $time minutes < $queue
 fi

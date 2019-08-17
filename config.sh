@@ -8,6 +8,8 @@ LOGFILE=/var/log/px-dns-da2cp.log
 
 port="22"
 
+time=5 # sync minutes
+
 host=( 
     [ns1]="ns1.cpdnsonlyserver.tld" 
     [ns2]="ns2.cpdnsonlyserver.tld"
