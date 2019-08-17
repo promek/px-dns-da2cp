@@ -1,6 +1,6 @@
 # px-dns-da2cp
 
-* Requirements for Centos7
+* Requirements for Centos7 (only work with Bind DNS Service)
 ```
 $ yum install rsync at sshpass
 $ service atd start
