@@ -49,7 +49,7 @@ sync_dns() {
 
     exist=$( bash_run "sshpass -p \"${pass}\" ssh -oStrictHostKeyChecking=no -p ${port} root@${host} \"whmapi1 dumpzone domain=${domain} | grep 'result: 1' \"" )
 
-    if [ -z $exist ]; then
+    if [ -z "$exist" ]; then
         result=$( bash_run "sshpass -p \"${pass}\" ssh -oStrictHostKeyChecking=no -p ${port} root@${host} \"whmapi1 adddns domain=${domain} ip=${ip}\"" )
         $DEBUG && echo "$(now) Add dns zone ${domain} to ${host}" >> $LOGFILE
         $DEBUG && echo "$result" >> $LOGFILE
